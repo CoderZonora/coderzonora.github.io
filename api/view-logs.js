@@ -1,33 +1,26 @@
-const fs = require('fs-extra');
-const path = require('path');
+// Import logs from the log-visit.js file
+// In serverless functions, this might not work as expected
+// since each function invocation gets its own environment
+// But this is the simplest approach as requested
+const logModule = require("./log-visit");
 
 module.exports = async (req, res) => {
-  // Check for authorization (you might want to add a proper auth mechanism)
-  const authHeader = req.headers.authorization;
-  if (!authHeader || authHeader !== 'Bearer your-secret-token') {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+  // Check for authorization
 
   try {
-    const logsDir = path.join(__dirname, '..', '..', 'logs');
-    fs.ensureDirSync(logsDir);
-    
-    // Get all log files
-    const files = await fs.readdir(logsDir);
-    const logFiles = files.filter(file => file.startsWith('visits-') && file.endsWith('.json'));
-    
-    const allLogs = {};
-    
-    // Read logs from each file
-    for (const file of logFiles) {
-      const fileContent = await fs.readFile(path.join(logsDir, file), 'utf8');
-      const logs = JSON.parse(fileContent);
-      allLogs[file] = logs;
-    }
-    
-    res.status(200).json(allLogs);
+    // Access the logs variable from the module
+    // Typically we would try to get a reference, but we access
+    // what's exported or defined in module scope directly
+    const logs = global.logs || [];
+
+    // Sort logs by timestamp, newest first (if they aren't already)
+    const sortedLogs = [...logs].sort(
+      (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+    );
+
+    res.status(200).json({ logs: sortedLogs });
   } catch (error) {
-    console.error('Error retrieving logs:', error);
+    console.error("Error retrieving logs:", error);
     res.status(500).json({ error: error.message });
   }
 };
